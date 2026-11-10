@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wave 4</title>
+    <link href="https://googleapis.com" rel="stylesheet"/>
+    <script>
+        var PlayerTurn = true;
+        var hp1 = 200;
+        var plrhp = window.sessionStorage.getItem("savedhp");
+        var targetenemy = 1;
+
+        function checkplayerdead() {
+            if (plrhp <= 0) {
+                document.getElementById('battlelog').innerHTML = "You got ded.";
+                setTimeout(function(){
+                    location.href = "index.html";
+                }, 5000);
+                return true;
+            }
+            return false;
+        }
+
+        function enemyattacks(){
+            const playerhealth = document.getElementById('playerhealth');
+            
+            if(hp1 <= 0) {
+                document.getElementById('battlelog').innerHTML = "You win, moving on.";
+                window.sessionStorage.setItem("savedhp",plrhp)
+                setTimeout(() => {
+                    location.href = "TheCaptain.html";
+                }, 5000);
+                return;
+            }
+
+            if(hp1 > 0) {
+                document.getElementById('g1name').innerHTML="Attacking";
+                if ((Math.random() * 10) <= 5){
+                    setTimeout(function(){
+                        document.getElementById('g1name').innerHTML="Hit! 10 damage";
+                        plrhp-=10;
+                        setTimeout(function(){
+                            playerhealth.innerHTML=plrhp;
+                            document.getElementById('g1name').innerHTML="Higher Soldier";
+                            if (!checkplayerdead()) {
+                                PlayerTurn=true;
+                            }
+                        }, 1000);
+                    }, 1000);
+                }else{
+                    setTimeout(function(){
+                        document.getElementById('g1name').innerHTML="Missed!";
+                        setTimeout(function(){
+                            document.getElementById('g1name').innerHTML="Higher Soldier";
+                            PlayerTurn=true;
+                        }, 1000);
+                    }, 1000);
+                }
+            }
+        }
+
+        function Attack(){
+            const atk = document.getElementById('atkselect');
+            if (PlayerTurn == true && atk.value !== "Pick"){
+                PlayerTurn = false;
+
+                if (hp1 <= 0) {
+                    document.getElementById('battlelog').innerHTML = "Target already dead!";
+                    PlayerTurn = true;
+                    return;
+                }
+
+                const stats = atk.value.split('-');
+                const hitChance = Number(stats[1]);
+                const damage = Number(stats[2]);
+
+                if ((Math.random() * 10) <= hitChance) {
+                    document.getElementById('battlelog').innerHTML = "You Hit!";
+                    hp1 = Math.max(0, hp1 - damage);
+                    document.getElementById('hpenemy1').innerHTML = hp1 + "HP";
+                    
+                    if(hp1 <= 0) {
+                        document.getElementById('Guard1').style.display = "none";
+                        document.getElementById('si1').style.display = "none";
+                    }
+                } else {
+                    document.getElementById('battlelog').innerHTML = "You Missed!";
+                }
+
+                setTimeout(function(){
+                    enemyattacks();
+                }, 1000);
+            }
+        }
+    </script>
+    <style>
+        @import url(https://googleapis.com);
+        h1{
+            font-family: 'Libre Baskerville', serif;
+            font-size: larger;
+            font-weight: bolder;
+        }
+        button{
+            font-family: 'Libre Baskerville', serif;
+            font-weight: bolder;
+            outline: auto;
+            outline-width: 3px;
+            background-color: red;
+            align-items: center;
+            justify-content: center;
+        }
+        select{
+            background-color: rgb(255, 110, 110);
+            outline-style: inset;
+            outline-color: rgb(255, 0, 0);
+            font-weight: bold;
+        }
+        h2{
+            font-size: smaller;
+            font-weight: bold;
+        }
+        .row-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 15px;
+            min-height: 40px;
+            width: 100%;
+        }
+        .indicator {width: 100px; }
+    </style>
+</head>
+<body style="background-color: rgb(255, 81, 81);">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; align-content: center; text-align: center; min-height: 100vh;">
+        <h1>A higher soldier arrives.</h1>
+        <br><br>
+        <div class="row-container">
+            <button class="indicator" id="si1">Selected</button>
+        </div>
+        <br>
+        <div class="row-container">
+            <button id="Guard1" style="align-self: center; width: 100px;">
+                <p id="g1name">Higher Soldier</p>
+                <br> —————— <br>
+                <p id="hpenemy1">200HP</p>
+            </button>
+        </div>
+        <br><br>
+        <select name="Attack" id="atkselect" required>
+            <option value="Pick" disabled selected>Pick an Attack</option>
+            <option value="1-7-10">Stab ( hit=7/10, damage=10 )</option>
+            <option value="2-3-50">ThroatCutter ( hit=3/10, damage=50 )</option>
+            <option value="3-5-25">KnifeThrow ( hit=5/10, damage=25 )</option>
+        </select>
+        <br>
+        <button onclick="Attack()" style="position: relative; bottom: 2px; width: 200px;">Use</button>
+        <br>
+        <button id="playerhealth" style="position: relative; width: 100px; background-color: rgb(255, 0, 90);">Loading</button>
+        <br>
+        <button style="position: relative; bottom: 20px; width: 40px; height: 20px; z-index: -1; background-color: rgb(255, 0, 90);">HP</button>
+        <br>
+        <button id="battlelog" style="position: relative; width: 200px; background-color: rgb(255, 0, 0); bottom: 10px;">Waiting...</button>
+    </div>
+</body>
+</html>
